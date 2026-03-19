@@ -21,7 +21,6 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
     const socket = io();
@@ -33,16 +32,29 @@
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         if (input.value) {
-        socket.emit('chat message', input.value);
-        input.value = '';
+            socket.emit('chat message', input.value);
+            input.value = '';
         }
     });
 
-    socket.on('chat message', (msg) => {
+    function addMessage(msg) {
         const item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = msg.user + " : " + msg.text;
+        if (msg.user === socket.id) {
+            item.style.color = "blue";
+        } else {
+            item.style.color = "red";
+        }
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    socket.on('chat message', (msg) => {
+        addMessage(msg);
+    });
+
+    socket.on('history', (msgs) => {
+        msgs.forEach(m => addMessage(m));
     });
     </script>
   </body>
